@@ -1,20 +1,29 @@
+import { ApolloServer }  from 'apollo-server';
 import "reflect-metadata";
 import {createConnection} from "typeorm";
 import {Person} from "./entity";
+import {setDummyPerson} from "./helpers/setDummyData";
+import {buildSchema} from "type-graphql";
+import {PersonResolver} from "./resolvers/personResolver";
 
-createConnection().then(async connection => {
+export interface Context {
+    person: Person;
+}
 
-    const person = new Person();
-    person.fullName = "Remus Lupin";
-    person.position = "Professor of Defence Against the Dark Arts";
-    person.email = "mooney@hogwarts.com";
-    person.photo = "https://69.media.tumblr.com/c8cba4c138f0cc0b8106b0c3ac9b883a/tumblr_nj86xxYBR61u5iclvo1_500.jpg";
-    person.link = "https://harrypotter.fandom.com/wiki/Remus_Lupin";
-    await connection.manager.save(person);
-    console.log("Saved a new person with id: " + person.id);
+async function bootstrap() {
+    try {
+        await createConnection();
+        const schema = await buildSchema({
+            resolvers: [PersonResolver],
+        });
 
-    console.log("Loading persons from the database...");
-    const persons = await connection.manager.find(Person);
-    console.log("Loaded persons: ", persons);
+        const server = new ApolloServer({ schema });
+        const { url } = await server.listen(4000);
+        console.log(`Server is running, GraphQL Playground available at ${url}`);
+    } catch (err) {
+        console.error(err);
+    }
+}
 
-}).catch(error => console.log(error));
+
+bootstrap();
