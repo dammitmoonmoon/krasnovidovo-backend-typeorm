@@ -15,6 +15,7 @@ async function bootstrap() {
         await createConnection();
         const schema = await buildSchema({
             resolvers: [PersonResolver],
+            validate: false,
         });
 
         const server = new ApolloServer({ schema });
@@ -24,6 +25,5 @@ async function bootstrap() {
         console.error(err);
     }
 }
-
 
 bootstrap();

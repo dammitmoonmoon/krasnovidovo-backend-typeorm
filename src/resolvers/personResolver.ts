@@ -1,15 +1,7 @@
 import {DeleteResult, getConnection, getRepository, InsertResult, Repository} from "typeorm";
 import {Person} from "../entity";
-import {Arg, Ctx, Field, Int, Mutation, Query, Resolver} from "type-graphql";
-import {AddPersonInput, UpdatePersonInput} from "../entity/Person";
-import {Context} from "../index";
-import {ObjectType} from "type-graphql/dist/decorators/ObjectType";
-
-@ObjectType()
-class DeletePersonReturnType {
-    @Field(_ => Int)
-    public id: number;
-}
+import {Arg, Int, Mutation, Query, Resolver} from "type-graphql";
+import {AddPersonInput, DeletedPerson, UpdatePersonInput} from "../entity/Person";
 
 @Resolver(of => Person)
 export class PersonResolver {
@@ -18,12 +10,12 @@ export class PersonResolver {
         this.repository = getRepository(Person);
     }
 
-    @Query(returns => Person, { nullable: true })
+    @Query(returns => [Person], { nullable: true })
      async person(
-        @Arg("personId", type => Int)
-            personId: number
-    ): Promise<Person> {
-        return this.repository.findOne(personId);
+        @Arg("personIds", type => [Int])
+            personIds: number[],
+    ): Promise<Person[]> {
+        return this.repository.findByIds(personIds);
     }
 
     @Query(returns => [Person], { nullable: true })
@@ -35,8 +27,6 @@ export class PersonResolver {
     async addPerson(
         @Arg("input")
             newPersonData: AddPersonInput,
-        @Ctx()
-            ctx: Context
     ): Promise<Person> {
         const person = this.repository.create(newPersonData);
         return await this.repository.save(person);
@@ -46,8 +36,6 @@ export class PersonResolver {
     async updatePerson(
         @Arg("input")
             updatePersonData: UpdatePersonInput,
-        @Ctx()
-            ctx: Context
     ): Promise<Person> {
         const id = updatePersonData.id;
         const person = await this.repository.findOne(id);
@@ -58,18 +46,15 @@ export class PersonResolver {
             ...person,
             ...updatePersonData
         };
-        await this.repository.save(updatedPerson);
-        return updatedPerson;
+        return await this.repository.save(updatedPerson);
     }
 
-    @Mutation(returns => [DeletePersonReturnType], { nullable: false })
+    @Mutation(returns => [DeletedPerson], { nullable: false })
     async deletePerson(
-        @Arg("input", type => [Int])
+        @Arg("personIds", type => [Int])
             personIds: number[],
-        @Ctx()
-            ctx: Context
-    ): Promise<DeletePersonReturnType[]> {
-        await this.repository.delete(personIds);
-        return personIds.map(id => ({ id }));
+    ): Promise<DeletedPerson[]> {
+        const selectedPersons = await this.repository.findByIds(personIds);
+        return await this.repository.remove(selectedPersons);
     }
 }

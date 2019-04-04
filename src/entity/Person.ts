@@ -19,33 +19,33 @@ export class Person {
 
     @Field({ nullable: true })
     @Column({ nullable: true })
-    photo?: string;
+    photo: string;
 
     @Field({ nullable: true })
     @Column({ nullable: true })
-    email?: string;
+    email: string;
 
     @Field({ nullable: true })
     @Column({ nullable: true })
-    link?: string;
+    link: string;
 }
 
-@InputType({ description: "New person data" })
-export class AddPersonInput implements Partial<Person> {
-    @Field()
+@ObjectType({ description: "Deleted Person" })
+export class DeletedPerson {
+    @Field({ nullable: true })
     fullName: string;
 
-    @Field()
+    @Field({ nullable: true })
     position: string;
 
     @Field({ nullable: true })
-    photo?: string;
+    photo: string;
 
     @Field({ nullable: true })
-    email?: string;
+    email: string;
 
     @Field({ nullable: true })
-    link?: string;
+    link: string;
 }
 
 @InputType({ description: "Update person data" })
@@ -68,4 +68,23 @@ export class UpdatePersonInput implements Partial<Person> {
     @Field({ nullable: true })
     link?: string;
 }
+
+@InputType({ description: "New person data" })
+export class AddPersonInput extends UpdatePersonInput {
+    @Field()
+    fullName: string;
+
+    @Field()
+    position: string;
+
+    @Field({ nullable: true })
+    photo?: string;
+
+    @Field({ nullable: true })
+    email?: string;
+
+    @Field({ nullable: true })
+    link?: string;
+}
+
 
