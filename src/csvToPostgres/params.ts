@@ -3,7 +3,6 @@ const LOCALTIME = 'Местное время в Можайске';
 enum RemappableMeteoHeaders {
     localTime = 'Местное время в Можайске',
     windDirection = 'DD',
-    windSpeed = 'Ff',
     cloudCover = 'N',
     ClCmCloudCover = 'Nh',
     precipitation = 'RRR',
@@ -13,6 +12,7 @@ enum RemappableMeteoHeaders {
 }
 
 enum MeteoHeaderVariables {
+    'Местное время в Можайске' = 'localTime',
     T = 'airTempAboveGround',
     Po = 'atmPressureStation',
     P = 'atmPressureSea',

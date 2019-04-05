@@ -1,6 +1,7 @@
 import * as parse from 'csv-parse';
 import * as fs from 'fs';
-import {LOCALTIME, MeteoHeaderVariables, RemappableMeteoHeaders} from "./enums";
+import { MeteoHeaderVariables, RemappableMeteoHeaders} from "./params";
+import {transformCloudCover, transformTimeString} from "./transformations";
 
 const DUMMY = './src/csvToPostgres/rawData/meteo1dummy.csv';
 
@@ -14,9 +15,7 @@ const parserOptions: parse.Options = {
     relax_column_count: true,
     to_line: 9,
     columns: header => header.map(
-        column => column == LOCALTIME ?
-            'localTime'
-            : MeteoHeaderVariables[column] || void 0
+        column => MeteoHeaderVariables[column] || void 0
     ),
     cast: (value, context) => {
         if (context.header) {
@@ -27,10 +26,14 @@ const parserOptions: parse.Options = {
             const column = mapIndexToTitle[context.index];
             switch (column) {
                 case RemappableMeteoHeaders.localTime: {
-                    return 'date';
+                    return transformTimeString(value);
                 }
-                case RemappableMeteoHeaders.cloudsCl: {
-                    return 'Cl';
+                case RemappableMeteoHeaders.cloudCover: {
+                    return transformCloudCover(value);
+                }
+                case RemappableMeteoHeaders.cloudCover:
+                case RemappableMeteoHeaders.ClCmCloudCover: {
+                    return transformCloudCover(value);
                 }
                 default:
                     return value;
