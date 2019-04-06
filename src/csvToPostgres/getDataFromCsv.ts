@@ -1,7 +1,12 @@
 import * as parse from 'csv-parse';
 import * as fs from 'fs';
 import { MeteoHeaderVariables, RemappableMeteoHeaders} from "./params";
-import {transformCloudCover, transformTimeString} from "./transformations";
+import {
+    transformClCmCloudData,
+    transformCloudCover, transformDefaultData,
+    transformPrecipitationData, transformSnowDepthData,
+    transformTimeString
+} from "./transformations";
 
 const DUMMY = './src/csvToPostgres/rawData/meteo1dummy.csv';
 
@@ -35,8 +40,18 @@ const parserOptions: parse.Options = {
                 case RemappableMeteoHeaders.ClCmCloudCover: {
                     return transformCloudCover(value);
                 }
+                case RemappableMeteoHeaders.cloudsCl:
+                case RemappableMeteoHeaders.cloudsCm: {
+                    return transformClCmCloudData(value);
+                }
+                case RemappableMeteoHeaders.precipitation: {
+                    return transformPrecipitationData(value);
+                }
+                case RemappableMeteoHeaders.snowDepth: {
+                    return transformSnowDepthData(value);
+                }
                 default:
-                    return value;
+                    return transformDefaultData(value);
             }
         }
     }

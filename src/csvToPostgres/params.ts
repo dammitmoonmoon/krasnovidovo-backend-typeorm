@@ -1,5 +1,13 @@
 const LOCALTIME = 'Местное время в Можайске';
 
+const commonStrings = {
+    noClouds: "Облаков нет.",
+    noPrecipitation: "Осадков нет",
+    almostNoPrecipitation: "Следы осадков",
+};
+
+const regexToExtractNumbers = /[+-]?\d+(?:\.\d+)?/g;
+
 enum RemappableMeteoHeaders {
     localTime = 'Местное время в Можайске',
     windDirection = 'DD',
@@ -56,4 +64,6 @@ export {
     MeteoHeaderVariables,
     MeteoHeaderTitles,
     LOCALTIME,
+    commonStrings,
+    regexToExtractNumbers,
 };

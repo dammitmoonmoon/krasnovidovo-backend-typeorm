@@ -1,23 +1,57 @@
+import {commonStrings, regexToExtractNumbers} from "./params";
+
 const transformTimeString = (value: string): Date => new Date();
 
-const noClouds = "Облаков нет.";
-
-const transformCloudCover = (value: string): number[]|null => {
-    if (value == noClouds) {
+const transformCloudCover = (value: string): number[]|undefined => {
+    if (value == commonStrings.noClouds) {
         return [0];
     }
 
-    const regexToExtractNumbers = /[+-]?\d+(?:\.\d+)?/g;
     let match;
     const numericValues = [];
     while (match = regexToExtractNumbers.exec(value)) {
         numericValues.push(Number(match[0]));
-    }
+    };
 
-    return numericValues.length ? numericValues.sort((a, b) => a - b) : null;
-}
+    return numericValues.length ? numericValues.sort((a, b) => a - b) : undefined;
+};
+
+const transformClCmCloudData = (value: string): boolean|undefined  => value ? !value.endsWith(' нет.') : undefined;
+
+const transformPrecipitationData = (value: string): number|undefined => {
+    if (value === "") {
+        return void 0;
+    }
+    if (Number(value)) {
+        return Number(value);
+    }
+    if ( (commonStrings.noPrecipitation + commonStrings.almostNoPrecipitation).includes(value) ) {
+        return 0;
+    }
+    return void 0;
+};
+
+const transformSnowDepthData = (value: string): number[]|undefined => {
+    const numericValues = [];
+    let match;
+    if (value.toLowerCase().includes('менее')) {
+        numericValues.push(0);
+    };
+    while (match = regexToExtractNumbers.exec(value)) {
+        numericValues.push(Number(match[0]));
+    };
+    return numericValues.length ? numericValues : void 0;
+};
+
+const transformDefaultData = (value: string): number|string|undefined => {
+    return value == "" ? void 0 : Number(value) ? Number(value) : value;
+};
 
 export {
     transformTimeString,
     transformCloudCover,
+    transformClCmCloudData,
+    transformPrecipitationData,
+    transformSnowDepthData,
+    transformDefaultData,
 };
