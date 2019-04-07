@@ -5,6 +5,7 @@ import {Person} from "./entity";
 import {buildSchema} from "type-graphql";
 import {PersonResolver} from "./resolvers/personResolver";
 import {parseCVSToPostgres} from "./csvToPostgres/getDataFromCsv";
+import {RP5MeteoDataResolver} from "./resolvers/rp5MeteoDataResolver";
 
 export interface Context {
     person: Person;
@@ -17,7 +18,7 @@ async function bootstrap(parse?: boolean) {
         parse && parseCVSToPostgres();
 
         const schema = await buildSchema({
-            resolvers: [PersonResolver],
+            resolvers: [PersonResolver, RP5MeteoDataResolver],
             validate: false,
         });
 
