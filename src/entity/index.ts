@@ -1,5 +1,7 @@
 import { Person } from './Person';
+import { RP5MeteoData } from './RP5MeteoData';
 
 export {
-    Person
+    Person,
+    RP5MeteoData,
 };

@@ -7,6 +7,7 @@ import {
     transformPrecipitationData, transformSnowDepthData,
     transformTimeString
 } from "./transformations";
+import {populateDatabase} from "./populateDatabase";
 
 const DUMMY = './src/csvToPostgres/rawData/meteo1dummy.csv';
 
@@ -18,7 +19,6 @@ const parserOptions: parse.Options = {
     delimiter: ';',
     skip_empty_lines: true,
     relax_column_count: true,
-    to_line: 9,
     columns: header => header.map(
         column => MeteoHeaderVariables[column] || void 0
     ),
@@ -58,9 +58,13 @@ const parserOptions: parse.Options = {
 };
 
 const parser = parse(parserOptions, (err, data) => {
-    console.log('data', data);
+    populateDatabase(data);
 });
 
-fs.createReadStream(DUMMY).pipe(parser);
+const parseCVSToPostgres = () => fs.createReadStream(DUMMY).pipe(parser);
+
+export {
+    parseCVSToPostgres
+}
 
 

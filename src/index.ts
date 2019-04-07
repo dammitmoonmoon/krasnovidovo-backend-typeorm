@@ -2,17 +2,20 @@ import { ApolloServer }  from 'apollo-server';
 import "reflect-metadata";
 import {createConnection} from "typeorm";
 import {Person} from "./entity";
-import {setDummyPerson} from "./helpers/setDummyData";
 import {buildSchema} from "type-graphql";
 import {PersonResolver} from "./resolvers/personResolver";
+import {parseCVSToPostgres} from "./csvToPostgres/getDataFromCsv";
 
 export interface Context {
     person: Person;
 }
 
-async function bootstrap() {
+async function bootstrap(parse?: boolean) {
     try {
         await createConnection();
+
+        parse && parseCVSToPostgres();
+
         const schema = await buildSchema({
             resolvers: [PersonResolver],
             validate: false,
