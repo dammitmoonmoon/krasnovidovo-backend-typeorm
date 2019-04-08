@@ -30,4 +30,4 @@ async function bootstrap(parse?: boolean) {
     }
 }
 
-bootstrap(true);
+bootstrap();

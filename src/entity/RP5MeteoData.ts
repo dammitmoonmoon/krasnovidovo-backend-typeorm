@@ -1,4 +1,4 @@
-import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, Index} from "typeorm";
 import {Field, ID, InputType, Int} from "type-graphql";
 import {ObjectType} from "type-graphql/dist/decorators/ObjectType";
 import {PrimaryColumn} from "typeorm/decorator/columns/PrimaryColumn";
@@ -11,6 +11,7 @@ export class RP5MeteoData {
     readonly id: number;
 
     @Field()
+    @Index("date_index", { unique: true })
     @PrimaryColumn({ type: "timestamp" })
     localTime: Date;
 
@@ -79,11 +80,20 @@ export class RP5MeteoData {
     cloudsCm: boolean;
 }
 
-@InputType({ description: "Filter set for meteo data" })
-export class GetMeteoDataInput {
+@InputType({ description: "DateFilters for meteo data" })
+export class GetFilteredMeteoDataInput {
     @Field()
     dateFrom: Date;
 
     @Field()
     dateTo: Date;
+}
+
+@InputType({ description: "DateFilters for meteo data" })
+export class GetMeteoDataInput {
+    @Field({ defaultValue: 10 })
+    limit: number;
+
+    @Field({ defaultValue: 0 })
+    offset: number;
 }
