@@ -1,5 +1,5 @@
 import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
-import {Field, ID, Int} from "type-graphql";
+import {Field, ID, InputType, Int} from "type-graphql";
 import {ObjectType} from "type-graphql/dist/decorators/ObjectType";
 import {PrimaryColumn} from "typeorm/decorator/columns/PrimaryColumn";
 
@@ -11,7 +11,7 @@ export class RP5MeteoData {
     readonly id: number;
 
     @Field()
-    @PrimaryColumn({ type: "timestamp with time zone" })
+    @PrimaryColumn({ type: "timestamp" })
     localTime: Date;
 
     @Field({ nullable: true })
@@ -77,4 +77,13 @@ export class RP5MeteoData {
     @Field({ nullable: true })
     @Column({ nullable: true })
     cloudsCm: boolean;
+}
+
+@InputType({ description: "Filter set for meteo data" })
+export class GetMeteoDataInput {
+    @Field()
+    dateFrom: Date;
+
+    @Field()
+    dateTo: Date;
 }

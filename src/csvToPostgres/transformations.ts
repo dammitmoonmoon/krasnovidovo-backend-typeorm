@@ -1,6 +1,11 @@
 import {commonStrings, regexToExtractNumbers} from "./params";
 
-const transformTimeString = (value: string): Date => new Date();
+const transformTimeString = (value: string): Date => {
+    const date = value.substring(0,2);
+    const month = value.substring(3,5);
+    const remainder = value.substring(5);
+    return new Date(`${month}.${date}${remainder}`);
+};
 
 const transformCloudCover = (value: string): number[]|undefined => {
     if (value == commonStrings.noClouds) {
