@@ -1,7 +1,6 @@
 import * as puppeteer from 'puppeteer';
-import {rp5} from "./dataSources";
 import {Page} from "puppeteer";
-import {rp5configs} from "./rp5configs";
+import {rp5, rp5configs} from "./rp5configs";
 import fetch from 'node-fetch';
 import * as fs from "fs";
 import * as path from "path";
@@ -28,17 +27,8 @@ puppeteer.launch().then(async browser => {
 
     await page.click(rp5configs.createCSVSelector);
 
-    await awaitSelector(rp5configs.loadCSVSelector, page);
-    const link = await page.evaluate((selector: string) => {
-        return (<HTMLBaseElement>document.querySelector(selector)).href;
-    }, rp5configs.loadCSVSelector);
-    const response = await fetch(link);
-    if (response.ok) {
-        const dest = fs.createWriteStream(path.join(__dirname, 'rawData', 'test.csv'));
-        response.body.pipe(zlib.createUnzip()).pipe(dest);
-    } else {
-        console.log(`Error. Response status: ${response.status}`);
-    }
+    await fetchGZAsCSV(page);
+
     await browser.close();
 });
 
@@ -64,11 +54,25 @@ const setCSVFormat = async (page: Page) => {
     }, `#${rp5configs.csvId}`, `#${rp5configs.utf8Id}`);
 };
 
+const fetchGZAsCSV = async (page: Page) => {
+    await awaitSelector(rp5configs.loadCSVSelector, page);
+    const link = await page.evaluate((selector: string) => {
+        return (<HTMLBaseElement>document.querySelector(selector)).href;
+    }, rp5configs.loadCSVSelector);
+    const response = await fetch(link);
+    if (response.ok) {
+        const dest = fs.createWriteStream(path.join(__dirname, 'rawData', 'test.csv'));
+        response.body.pipe(zlib.createUnzip()).pipe(dest);
+    } else {
+        throw `Error. Response status: ${response.status}`;
+    }
+};
+
 const awaitSelector = async (selector: string, page: Page) => {
     try {
         await page.waitForSelector(selector);
     } catch (e) {
-        console.log(`Error. Selector ${selector} is unavailable`);
+        throw `Error. Selector ${selector} is unavailable`;
     }
 };
 
