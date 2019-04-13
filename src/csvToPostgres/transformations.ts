@@ -52,6 +52,45 @@ const transformDefaultData = (value: string): number|string|undefined => {
     return value == "" ? void 0 : Number(value) ? Number(value) : value;
 };
 
+
+const transformWindDirection = (value: string): number | string[] | undefined => {
+
+    if(value === '') {
+        return undefined;
+    }
+    const string = value.replace(/['"]+/g, '');
+    if(string == 'Штиль, безветрие') {
+        return 0;
+    }
+
+    const arrToReplace = string.replace('Ветер, дующий с ', '').split('-');
+
+    const result = arrToReplace.map(item => {
+
+        if(item === 'северо' || item === 'севера') {
+            return 'N';
+        }
+
+        if(item === 'юго' || item === 'юга') {
+            return 'S';
+        }
+
+        if(item === 'западо' || item === 'запада') {
+            return 'W';
+        }
+
+        if(item === 'востоко' || item === 'востока') {
+            return 'E';
+        }
+
+        return item;
+
+    });
+
+    return result;
+};
+
+
 export {
     transformTimeString,
     transformCloudCover,
@@ -59,4 +98,5 @@ export {
     transformPrecipitationData,
     transformSnowDepthData,
     transformDefaultData,
+    transformWindDirection,
 };

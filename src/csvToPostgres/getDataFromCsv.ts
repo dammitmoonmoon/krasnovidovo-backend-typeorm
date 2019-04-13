@@ -5,7 +5,7 @@ import {
     transformClCmCloudData,
     transformCloudCover, transformDefaultData,
     transformPrecipitationData, transformSnowDepthData,
-    transformTimeString
+    transformTimeString, transformWindDirection
 } from "./transformations";
 import {populateDatabase} from "./populateDatabase";
 
@@ -49,6 +49,9 @@ const parserOptions: parse.Options = {
                 }
                 case RemappableMeteoHeaders.snowDepth: {
                     return transformSnowDepthData(value);
+                }
+                case RemappableMeteoHeaders.windDirection: {
+                    return transformWindDirection(value);
                 }
                 default:
                     return transformDefaultData(value);
