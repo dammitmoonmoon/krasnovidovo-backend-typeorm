@@ -1,13 +1,16 @@
-import {BaseEntity, BeforeInsert, Column, Entity, PrimaryColumn} from "typeorm";
-import * as uuidv4 from 'uuid/v4';
-import {Field, ID, ObjectType} from "type-graphql";
+import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import {Field, ID, InputType, ObjectType} from "type-graphql";
 
 @ObjectType({ description: "The user model" })
-@Entity()
+@Entity("users")
 export class User extends BaseEntity {
     @Field(type => ID)
-    @PrimaryColumn("uuid")
+    @PrimaryGeneratedColumn()
     id: string;
+
+    @Field()
+    @Column("varchar", { length: 225 })
+    username: string;
 
     @Field()
     @Column("varchar", { length: 225 })
@@ -16,9 +19,16 @@ export class User extends BaseEntity {
     @Field()
     @Column("text")
     password: string;
+}
 
-    @BeforeInsert()
-    addId() {
-        this.id = uuidv4();
-    }
+@InputType({ description: "User registration input" })
+export class RegisterUserInput {
+    @Field()
+    username: string;
+
+    @Field()
+    email: string;
+
+    @Field()
+    password: string;
 }

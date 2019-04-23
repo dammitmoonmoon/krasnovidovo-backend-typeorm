@@ -2,10 +2,13 @@ import { ApolloServer }  from 'apollo-server';
 import "reflect-metadata";
 import {createConnection} from "typeorm";
 import {buildSchema} from "type-graphql";
-import {AssociateResolver} from "./modules/Associates/AssociateResolver";
+import {AssociateResolver} from "./modules/Associates/resolvers/AssociateResolver";
 import {parseCVSToPostgres} from "./parsing/rp5parser/rawDataConversion/getDataFromCsv";
 import {RP5MeteoDataResolver} from "./modules/RP5MeteoData";
+import {UserResolver} from "./modules/User/resolvers/UserResolver";
+import * as Redis from 'ioredis';
 
+const redis = new Redis();
 
 async function bootstrap(parse?: boolean) {
     try {
@@ -14,11 +17,11 @@ async function bootstrap(parse?: boolean) {
         parse && parseCVSToPostgres();
 
         const schema = await buildSchema({
-            resolvers: [AssociateResolver, RP5MeteoDataResolver],
+            resolvers: [AssociateResolver, RP5MeteoDataResolver, UserResolver],
             validate: false,
         });
 
-        const server = new ApolloServer({ schema , cors: true});
+        const server = new ApolloServer({ schema , cors: true, context: {redis}});
         const { url } = await server.listen(4000);
         console.log(`Server is running, GraphQL Playground available at ${url}`);
     } catch (err) {
