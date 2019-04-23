@@ -18,7 +18,7 @@ async function bootstrap(parse?: boolean) {
             validate: false,
         });
 
-        const server = new ApolloServer({ schema });
+        const server = new ApolloServer({ schema , cors: true});
         const { url } = await server.listen(4000);
         console.log(`Server is running, GraphQL Playground available at ${url}`);
     } catch (err) {
