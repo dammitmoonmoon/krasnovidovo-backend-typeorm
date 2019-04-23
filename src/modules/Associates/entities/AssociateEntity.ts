@@ -2,9 +2,9 @@ import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
 import {Field, ID, InputType} from "type-graphql";
 import {ObjectType} from "type-graphql/dist/decorators/ObjectType";
 
-@ObjectType({ description: "The person model" })
+@ObjectType({ description: "The associate model" })
 @Entity()
-export class Person {
+export class Associate {
     @Field(type => ID)
     @PrimaryGeneratedColumn()
     readonly id: number;
@@ -30,8 +30,8 @@ export class Person {
     link: string;
 }
 
-@ObjectType({ description: "Deleted Person" })
-export class DeletedPerson {
+@ObjectType({ description: "Deleted AssociateEntity" })
+export class DeletedAssociate {
     @Field({ nullable: true })
     fullName: string;
 
@@ -48,8 +48,8 @@ export class DeletedPerson {
     link: string;
 }
 
-@InputType({ description: "Update person data" })
-export class UpdatePersonInput implements Partial<Person> {
+@InputType({ description: "Update associate data" })
+export class UpdateAssociateInput implements Partial<Associate> {
     @Field()
     readonly id: number;
 
@@ -69,8 +69,8 @@ export class UpdatePersonInput implements Partial<Person> {
     link?: string;
 }
 
-@InputType({ description: "New person data" })
-export class AddPersonInput extends UpdatePersonInput {
+@InputType({ description: "New associate data" })
+export class AddAssociateInput extends UpdateAssociateInput {
     @Field()
     fullName: string;
 

@@ -131,7 +131,7 @@ const testData = {
     defaultData,
 };
 
-describe('Test data transformation functions', () => {
+describe('Test data rawDataConversion functions', () => {
 
     test('Date string is converted into a Date object', () => {
         expect(transformTimeString(testData.testDate)).toBeTruthy();

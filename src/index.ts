@@ -1,15 +1,11 @@
 import { ApolloServer }  from 'apollo-server';
 import "reflect-metadata";
 import {createConnection} from "typeorm";
-import {Person} from "./entity";
 import {buildSchema} from "type-graphql";
-import {PersonResolver} from "./resolvers/personResolver";
-import {parseCVSToPostgres} from "./csvToPostgres/getDataFromCsv";
-import {RP5MeteoDataResolver} from "./resolvers/rp5MeteoDataResolver";
+import {AssociateResolver} from "./modules/Associates/AssociateResolver";
+import {parseCVSToPostgres} from "./parsing/rp5parser/rawDataConversion/getDataFromCsv";
+import {RP5MeteoDataResolver} from "./modules/RP5MeteoData";
 
-export interface Context {
-    person: Person;
-}
 
 async function bootstrap(parse?: boolean) {
     try {
@@ -18,7 +14,7 @@ async function bootstrap(parse?: boolean) {
         parse && parseCVSToPostgres();
 
         const schema = await buildSchema({
-            resolvers: [PersonResolver, RP5MeteoDataResolver],
+            resolvers: [AssociateResolver, RP5MeteoDataResolver],
             validate: false,
         });
 

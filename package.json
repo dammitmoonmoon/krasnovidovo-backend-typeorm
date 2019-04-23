@@ -29,9 +29,9 @@
    "scripts": {
       "start": "ts-node src/index.ts",
       "dev": "nodemon --watch",
-      "parseCsv": "ts-node ./src/csvToPostgres/getDataFromCsv.ts",
+      "parseCsv": "ts-node src/parsing/rp5parser/rawDataConversion/getDataFromCsv.ts",
       "test": "jest  --watch --verbose false",
       "coverage": "jest --coverage",
-      "scrap": "ts-node ./src/parser/rp5parser.ts"
+      "scrap": "ts-node src/parsing/rp5parser/rp5parser.ts"
    }
 }

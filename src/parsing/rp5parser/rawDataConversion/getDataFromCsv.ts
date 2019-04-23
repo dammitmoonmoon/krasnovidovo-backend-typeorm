@@ -9,7 +9,7 @@ import {
 } from "./transformations";
 import {populateDatabase} from "./populateDatabase";
 
-const DUMMY = './src/csvToPostgres/rawData/meteo1dummy.csv';
+const DUMMY = './src/parsing/rp5parser/rawDataConversion/rawData';
 
 const mapIndexToTitle = {};
 

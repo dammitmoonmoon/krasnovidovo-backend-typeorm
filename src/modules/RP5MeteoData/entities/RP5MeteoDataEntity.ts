@@ -1,5 +1,5 @@
 import {Entity, PrimaryGeneratedColumn, Column, Index} from "typeorm";
-import {Field, ID, InputType, Int} from "type-graphql";
+import {Field, Float, ID, InputType, Int} from "type-graphql";
 import {ObjectType} from "type-graphql/dist/decorators/ObjectType";
 import {PrimaryColumn} from "typeorm/decorator/columns/PrimaryColumn";
 
@@ -67,7 +67,7 @@ export class RP5MeteoData {
     @Column("real", { nullable: true })
     precipitationAccumulationTime: number;
 
-    @Field(() => [Int], { nullable: true })
+    @Field(() => [Float], { nullable: true })
     @Column("real", { array: true, nullable: true })
     snowDepth: number[];
 

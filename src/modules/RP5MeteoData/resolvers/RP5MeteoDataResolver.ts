@@ -1,8 +1,6 @@
 import {getRepository, Repository} from "typeorm";
-import {Person, RP5MeteoData} from "../entity";
-import {Arg, Int, Query, Resolver} from "type-graphql";
-import {AddPersonInput} from "../entity/Person";
-import {GetFilteredMeteoDataInput, GetMeteoDataInput} from "../entity/RP5MeteoData";
+import {Arg, Query, Resolver} from "type-graphql";
+import {GetFilteredMeteoDataInput, GetMeteoDataInput, RP5MeteoData} from "../entities/RP5MeteoDataEntity";
 
 @Resolver(of => RP5MeteoData)
 export class RP5MeteoDataResolver {

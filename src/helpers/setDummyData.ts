@@ -1,5 +1,5 @@
 import { getRepository } from "typeorm";
-import {Person} from "../entity";
+import {Person} from "../entities";
 
 export async function setDummyPerson(): Promise<{defaultPerson: Person}> {
     const personRepository = getRepository(Person);
