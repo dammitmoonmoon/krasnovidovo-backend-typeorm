@@ -32,3 +32,13 @@ export class RegisterUserInput {
     @Field()
     password: string;
 }
+
+
+@InputType({ description: "User login input" })
+export class UserLoginInput {
+    @Field()
+    username: string;
+
+    @Field()
+    password: string;
+}
