@@ -1,13 +1,19 @@
-import {Arg, Ctx, Mutation, Resolver} from "type-graphql";
+import {Arg, Ctx, Mutation, Query, Resolver} from "type-graphql";
 import {RegisterUserInput, User, UserLoginInput} from "../entities/User";
 import {getRepository, Repository} from "typeorm";
 import * as bcrypt from "bcrypt";
 import {Redis} from "ioredis";
 import {Request} from "express";
+import {userSessionIdPrefix} from "../../../common/constants";
 
 interface Context {
     redis: Redis;
     req: Request;
+    session: Session;
+}
+
+interface Session {
+    userId?: string;
 }
 
 @Resolver(of => User)
@@ -15,6 +21,20 @@ export class UserResolver {
     private readonly repository: Repository<User>;
     constructor() {
         this.repository = getRepository(User);
+    }
+
+    @Query(returns => User, { nullable: false })
+    async getCurrentUser(
+        @Ctx() ctx: Context
+    ): Promise<User> {
+        const userId = ctx.session.userId;
+        const currentUser = await this.repository.findOne({
+            where: {id: userId}
+        });
+        if (!currentUser) {
+            throw new Error('User is not logged in');
+        }
+        return currentUser;
     }
 
     @Mutation(returns => User, { nullable: false })
@@ -57,19 +77,18 @@ export class UserResolver {
             throw new Error('No such user')
         };
 
-        const valid = await bcrypt.compare(password, user.password)
+        const valid = await bcrypt.compare(password, user.password);
 
         if (!valid) {
             throw new Error('Wrong password')
         };
 
-        console.log('ctx.req.session', ctx.req.session);
-        if (ctx.req.session) {
-            ctx.req.session.userId = user.id;
+        ctx.req.session.userId = user.id;
+
+        if (ctx.req.sessionID) {
+            await ctx.redis.lpush(`${userSessionIdPrefix}${user.id}`, ctx.req.sessionID);
         }
-        console.log('ctx.req.session', ctx.req.session);
 
-
-        return 'Found ya'
+        return 'Login successful'
     }
 }
