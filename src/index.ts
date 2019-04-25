@@ -39,7 +39,10 @@ async function bootstrap() {
         app.use(
             cors({
                 credentials: true,
-                origin: "http://localhost:4000"
+                origin: [
+                    "http://localhost:4000",
+                    "http://localhost:3000",
+                ]
             })
         );
         app.use(
