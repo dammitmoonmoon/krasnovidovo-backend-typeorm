@@ -9,12 +9,11 @@ import {userSessionIdPrefix} from "../../../common/constants";
 interface Context {
     redis: Redis;
     req: Request;
-    session: Session;
 }
 
-interface Session {
-    userId?: string;
-}
+// interface Session {
+//     userId?: string;
+// }
 
 @Resolver(of => User)
 export class UserResolver {
@@ -23,18 +22,17 @@ export class UserResolver {
         this.repository = getRepository(User);
     }
 
-    @Query(returns => User, { nullable: false })
+    @Query(returns => User)
     async getCurrentUser(
         @Ctx() ctx: Context
     ): Promise<User> {
-        const userId = ctx.session.userId;
+        const userId =  ctx.req.session.userId;
+
         const currentUser = await this.repository.findOne({
             where: {id: userId}
         });
-        if (!currentUser) {
-            throw new Error('User is not logged in');
-        }
-        return currentUser;
+
+        return currentUser || null;
     }
 
     @Mutation(returns => User, { nullable: false })
@@ -50,7 +48,7 @@ export class UserResolver {
 
         if (userAlreadyExists) {
             throw new Error('User already exists')
-        };
+        }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = this.repository.create({
@@ -61,7 +59,6 @@ export class UserResolver {
         return await this.repository.save(user);
     }
 
-    //add context somehow
     @Mutation(returns => String, { nullable: false })
     async login(
         @Arg("input")
@@ -75,13 +72,13 @@ export class UserResolver {
 
         if (!user) {
             throw new Error('No such user')
-        };
+        }
 
         const valid = await bcrypt.compare(password, user.password);
 
         if (!valid) {
             throw new Error('Wrong password')
-        };
+        }
 
         ctx.req.session.userId = user.id;
 

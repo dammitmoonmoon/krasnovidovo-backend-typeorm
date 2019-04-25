@@ -41,7 +41,7 @@
       "typeorm": "0.2.16"
    },
    "scripts": {
-      "start": "ts-node src/index.ts",
+      "start": "ts-node src/server.ts",
       "dev": "nodemon --watch",
       "parseCsv": "ts-node src/parsing/rp5parser/rawDataConversion/getDataFromCsv.ts",
       "test": "jest  --watch --verbose false",

@@ -1,5 +1,4 @@
 import { ApolloServer }  from 'apollo-server-express';
-import "reflect-metadata";
 import {createConnection} from "typeorm";
 import {buildSchema} from "type-graphql";
 import {AssociateResolver} from "./modules/Associates/resolvers/AssociateResolver";
@@ -48,14 +47,15 @@ async function bootstrap() {
         app.use(
             session({
                 store: new RedisStore({}),
-                name: "qid",
+                name: "sessionId",
                 secret: SESSION_SECRET,
                 resave: false,
                 saveUninitialized: false,
                 cookie: {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
-                    maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+                    maxAge: 1000 * 60 * 60 * 2, // 2 hours
+                    sameSite: true,
                 }
             })
         );
