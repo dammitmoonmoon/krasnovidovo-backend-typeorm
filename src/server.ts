@@ -4,11 +4,11 @@ import {buildSchema} from "type-graphql";
 import {AssociateResolver} from "./modules/Associates/resolvers/AssociateResolver";
 import {RP5MeteoDataResolver} from "./modules/RP5MeteoData";
 import {UserResolver} from "./modules/User/resolvers/UserResolver";
-import * as express from "express";
-import * as cors from "cors";
-import * as session from "express-session";
-import * as Redis from 'ioredis';
-import * as connectRedis from 'connect-redis';
+import express from "express";
+import cors from "cors";
+import session from "express-session";
+import Redis from 'ioredis';
+import connectRedis from 'connect-redis';
 
 const redis = new Redis();
 const RedisStore = connectRedis(session);

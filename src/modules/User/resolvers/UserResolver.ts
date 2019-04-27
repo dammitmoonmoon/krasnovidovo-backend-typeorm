@@ -1,19 +1,16 @@
-import {Arg, Ctx, Mutation, Query, Resolver} from "type-graphql";
+import {Arg, Ctx, ID, Mutation, Query, Resolver} from "type-graphql";
 import {RegisterUserInput, User, UserLoginInput} from "../entities/User";
-import {getRepository, Repository} from "typeorm";
-import * as bcrypt from "bcrypt";
+import {DeleteResult, getRepository, Repository} from "typeorm";
+import bcrypt from "bcrypt";
 import {Redis} from "ioredis";
 import {Request} from "express";
-import {userSessionIdPrefix} from "../../../common/constants";
+import {ApolloError} from "apollo-server-errors";
+import {customErrors, ErrorTitles} from "../../../common/errors";
 
 interface Context {
     redis: Redis;
     req: Request;
 }
-
-// interface Session {
-//     userId?: string;
-// }
 
 @Resolver(of => User)
 export class UserResolver {
@@ -22,46 +19,27 @@ export class UserResolver {
         this.repository = getRepository(User);
     }
 
-    @Query(returns => User)
-    async getCurrentUser(
-        @Ctx() ctx: Context
-    ): Promise<User> {
-        const userId =  ctx.req.session.userId;
-
-        const currentUser = await this.repository.findOne({
-            where: {id: userId}
-        });
-
-        return currentUser || null;
-    }
-
-    @Query(returns => [User])
-    async listUsers(
-        @Ctx() ctx: Context
-    ): Promise<User[]> {
-        return await this.repository.find();
-    }
-
     @Mutation(returns => User, { nullable: false })
     async registerUser(
         @Arg("input")
             registerUserData: RegisterUserInput,
     ): Promise<User> {
-        const { username, password, email } = registerUserData;
+        const { username, password, email, role } = registerUserData;
         const userAlreadyExists = await this.repository.findOne({
             where: { email },
             select: ['id']
         });
 
         if (userAlreadyExists) {
-            throw new Error('User already exists')
+            throwCustomError(ErrorTitles.AlreadyExists);
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = this.repository.create({
             username,
             email,
-            password: hashedPassword
+            role,
+            password: hashedPassword,
         });
         return await this.repository.save(user);
     }
@@ -71,24 +49,78 @@ export class UserResolver {
         @Arg("input")
             loginInput: UserLoginInput,
         @Ctx() ctx: Context
-    ): Promise<string> {
+    ): Promise<User> {
         const { username, password } = loginInput;
         const user = await this.repository.findOne({
             where: { username },
         });
 
         if (!user) {
-            throw new Error('No such user')
+            throwCustomError(ErrorTitles.UserNotFound);
         }
 
         const valid = await bcrypt.compare(password, user.password);
 
         if (!valid) {
-            throw new Error('Wrong password')
+            throwCustomError(ErrorTitles.PasswordInvalid);
         }
 
         ctx.req.session.userId = user.id;
 
-        return 'Login successful'
+        return user;
     }
+
+    @Mutation(returns => String, { nullable: false })
+    async logout(
+        @Ctx() ctx: Context
+    ): Promise<User> {
+
+        const currentUser = getUserBySession(ctx);
+
+        ctx.req.session.destroy(err => {
+            if (err) {
+                throwCustomError(ErrorTitles.LogoutFailed)
+            }
+        });
+
+        return currentUser;
+    }
+
+    @Query(returns => User)
+    async getCurrentUser(
+        @Ctx() ctx: Context
+    ): Promise<User> {
+        return getUserBySession(ctx);
+    }
+
+    @Query(returns => [User])
+    async listUsers(
+        @Ctx() ctx: Context
+    ): Promise<User[]> {
+        return await this.repository.find();
+    }
+
+    @Mutation(returns => Number, { nullable: false })
+    async deleteUser(
+        @Arg("input")
+        id: number,
+    ): Promise<number> {
+       await this.repository.delete(id);
+       return id;
+    }
+}
+
+function throwCustomError(error: ErrorTitles) {
+    const {message, code} = customErrors[error];
+    throw new ApolloError(message, code);
+}
+
+async function getUserBySession(ctx: Context): Promise<User|null> {
+    const userId =  ctx.req.session.userId;
+
+    const currentUser = await this.repository.findOne({
+        where: {id: userId}
+    });
+
+    return currentUser || null;
 }

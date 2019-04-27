@@ -1,5 +1,6 @@
 import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 import {Field, ID, InputType, ObjectType} from "type-graphql";
+import {Roles} from "../../../common/pgEnums";
 
 @ObjectType({ description: "The user model" })
 @Entity("users")
@@ -8,17 +9,25 @@ export class User extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: string;
 
+    @Field(type => Roles)
+    @Column({
+        type: "enum",
+        enum: Roles,
+        default: [Roles.USER]
+    })
+    role: Roles;
+
     @Field()
     @Column("varchar", { length: 225 })
     username: string;
 
     @Field()
-    @Column("varchar", { length: 225 })
-    email: string;
-
-    @Field()
     @Column("text")
     password: string;
+
+    @Field()
+    @Column("varchar", { length: 225 })
+    email: string;
 }
 
 @InputType({ description: "User registration input" })
@@ -31,6 +40,9 @@ export class RegisterUserInput {
 
     @Field()
     password: string;
+
+    @Field(type => Roles)
+    role: Roles;
 }
 
 
