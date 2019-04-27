@@ -35,6 +35,13 @@ export class UserResolver {
         return currentUser || null;
     }
 
+    @Query(returns => [User])
+    async listUsers(
+        @Ctx() ctx: Context
+    ): Promise<User[]> {
+        return await this.repository.find();
+    }
+
     @Mutation(returns => User, { nullable: false })
     async registerUser(
         @Arg("input")
@@ -81,10 +88,6 @@ export class UserResolver {
         }
 
         ctx.req.session.userId = user.id;
-
-        if (ctx.req.sessionID) {
-            await ctx.redis.lpush(`${userSessionIdPrefix}${user.id}`, ctx.req.sessionID);
-        }
 
         return 'Login successful'
     }

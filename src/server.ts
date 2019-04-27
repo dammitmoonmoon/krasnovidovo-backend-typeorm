@@ -38,12 +38,9 @@ async function bootstrap() {
         app.use(
             cors({
                 credentials: true,
-                origin: [
-                    "http://localhost:4000",
-                    "http://localhost:3000",
-                ]
-            })
-        );
+                origin: true,
+            }
+        ));
         app.use(
             session({
                 store: new RedisStore({}),
@@ -52,7 +49,6 @@ async function bootstrap() {
                 resave: false,
                 saveUninitialized: false,
                 cookie: {
-                    httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
                     maxAge: 1000 * 60 * 60 * 2, // 2 hours
                     sameSite: true,
@@ -60,7 +56,7 @@ async function bootstrap() {
             })
         );
 
-        server.applyMiddleware({app});
+        server.applyMiddleware({app, cors: false});
 
         app.listen({ port: 4000 }, () =>
             console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
