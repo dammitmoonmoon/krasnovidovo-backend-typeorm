@@ -6,6 +6,7 @@ import {Redis} from "ioredis";
 import {Request} from "express";
 import {ApolloError} from "apollo-server-errors";
 import {customErrors, ErrorTitles} from "../../../common/errors";
+import {userSessionIdPrefix} from "../../../common/constants";
 
 interface Context {
     redis: Redis;
@@ -17,6 +18,21 @@ export class UserResolver {
     private readonly repository: Repository<User>;
     constructor() {
         this.repository = getRepository(User);
+    }
+
+    private throwCustomError(error: ErrorTitles) {
+        const {message, code} = customErrors[error];
+        throw new ApolloError(message, code);
+    }
+
+    private async getUserBySession(ctx: Context): Promise<User|null> {
+        const userId =  ctx.req.session.userId;
+
+        const currentUser = await this.repository.findOne({
+            where: {id: userId}
+        });
+
+        return currentUser || null;
     }
 
     @Mutation(returns => User, { nullable: false })
@@ -31,7 +47,7 @@ export class UserResolver {
         });
 
         if (userAlreadyExists) {
-            throwCustomError(ErrorTitles.AlreadyExists);
+            this.throwCustomError(ErrorTitles.AlreadyExists);
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -44,7 +60,7 @@ export class UserResolver {
         return await this.repository.save(user);
     }
 
-    @Mutation(returns => String, { nullable: false })
+    @Mutation(returns => User, { nullable: false })
     async login(
         @Arg("input")
             loginInput: UserLoginInput,
@@ -56,30 +72,34 @@ export class UserResolver {
         });
 
         if (!user) {
-            throwCustomError(ErrorTitles.UserNotFound);
+            this.throwCustomError(ErrorTitles.UserNotFound);
         }
 
         const valid = await bcrypt.compare(password, user.password);
 
         if (!valid) {
-            throwCustomError(ErrorTitles.PasswordInvalid);
+            this.throwCustomError(ErrorTitles.PasswordInvalid);
         }
 
         ctx.req.session.userId = user.id;
 
+        if (ctx.req.sessionID) {
+            await ctx.redis.lpush(`${userSessionIdPrefix}${user.id}`, ctx.req.sessionID);
+        }
+
         return user;
     }
 
-    @Mutation(returns => String, { nullable: false })
+    @Mutation(returns => User, { nullable: false })
     async logout(
         @Ctx() ctx: Context
     ): Promise<User> {
 
-        const currentUser = getUserBySession(ctx);
+        const currentUser = this.getUserBySession(ctx);
 
         ctx.req.session.destroy(err => {
             if (err) {
-                throwCustomError(ErrorTitles.LogoutFailed)
+                this.throwCustomError(ErrorTitles.LogoutFailed)
             }
         });
 
@@ -90,7 +110,7 @@ export class UserResolver {
     async getCurrentUser(
         @Ctx() ctx: Context
     ): Promise<User> {
-        return getUserBySession(ctx);
+        return this.getUserBySession(ctx);
     }
 
     @Query(returns => [User])
@@ -108,19 +128,4 @@ export class UserResolver {
        await this.repository.delete(id);
        return id;
     }
-}
-
-function throwCustomError(error: ErrorTitles) {
-    const {message, code} = customErrors[error];
-    throw new ApolloError(message, code);
-}
-
-async function getUserBySession(ctx: Context): Promise<User|null> {
-    const userId =  ctx.req.session.userId;
-
-    const currentUser = await this.repository.findOne({
-        where: {id: userId}
-    });
-
-    return currentUser || null;
 }
