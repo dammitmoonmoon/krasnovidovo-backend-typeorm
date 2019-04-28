@@ -3,7 +3,7 @@ import {
     transformCloudCover,
     transformTimeString,
     transformPrecipitationData,
-    transformSnowDepthData, transformDefaultData
+    transformSnowDepthData, transformDefaultData, transformWindDirection
 } from "../transformations";
 import {commonStrings} from "../params";
 
@@ -69,6 +69,34 @@ const ClCmCloudData = {
     }
 };
 
+const DDWindDataForTest = {
+    dataEmpty: {
+        input: '',
+        output: undefined,
+    },
+    test1: {
+        input: '"Штиль, безветрие"',
+        output: 0,
+    },
+    test2: {
+        input: '"Ветер, дующий с юга"',
+        output: ['S'],
+    },
+    test3: {
+        input: '"Ветер, дующий с юго-востока"',
+        output: ['S', 'E'],
+    },
+    test4: {
+        input: '"Ветер, дующий с северо-северо-запада"',
+        output: ['N', 'N', 'W'],
+    },
+    test5: {
+        input: '"Ветер, дующий с юго-юго-запада"',
+        output: ['S', 'S', 'W'],
+    },
+
+};
+
 const precipitationData = {
     noPrecipitation: {
         input: commonStrings.noPrecipitation,
@@ -129,6 +157,7 @@ const testData = {
     precipitationData,
     snowDepthData,
     defaultData,
+    DDWindDataForTest,
 };
 
 describe('Test data rawDataConversion functions', () => {
@@ -153,6 +182,7 @@ describe('Test data rawDataConversion functions', () => {
         });
     });
 
+
     const precipitationData = testData.precipitationData;
     const precipitationDataKeys = Object.keys(precipitationData);
     test('Precipitation data is correctly parsed', () => {
@@ -174,6 +204,15 @@ describe('Test data rawDataConversion functions', () => {
     test('Default data is correctly parsed', () => {
         defaultDataKeys.forEach(key => {
             return expect(transformDefaultData(defaultData[key].input)).toEqual(defaultData[key].output);
+        });
+    });
+
+
+    const DDWindData = testData.DDWindDataForTest;
+    const testDDWindDataKeys = Object.keys(DDWindData);
+    test('DD wind data is correctly parsed', () => {
+        testDDWindDataKeys.forEach(key => {
+            return expect(transformWindDirection(DDWindData[key].input)).toEqual(DDWindData[key].output);
         });
     });
 });
