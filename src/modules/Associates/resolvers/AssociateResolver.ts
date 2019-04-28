@@ -1,6 +1,6 @@
 import {getRepository, Repository} from "typeorm";
 import {Arg, Int, Mutation, Query, Resolver} from "type-graphql";
-import {AddAssociateInput, Associate, DeletedAssociate, UpdateAssociateInput} from "./entities/AssociateEntity";
+import {AddAssociateInput, Associate, DeletedAssociate, UpdateAssociateInput} from "../entities/AssociateEntity";
 
 @Resolver(of => Associate)
 export class AssociateResolver {
