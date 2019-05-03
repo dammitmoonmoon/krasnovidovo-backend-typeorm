@@ -9,6 +9,7 @@ import cors from "cors";
 import session from "express-session";
 import Redis from 'ioredis';
 import connectRedis from 'connect-redis';
+import {ImageFileResolver} from "./modules/ImageLoader/resolver/ImageFileResolver";
 
 const redis = new Redis();
 const RedisStore = connectRedis(session);
@@ -21,7 +22,12 @@ async function bootstrap() {
         await createConnection();
 
         const schema = await buildSchema({
-            resolvers: [AssociateResolver, RP5MeteoDataResolver, UserResolver],
+            resolvers: [
+                AssociateResolver,
+                RP5MeteoDataResolver,
+                UserResolver,
+                ImageFileResolver,
+            ],
             validate: false,
         });
 
