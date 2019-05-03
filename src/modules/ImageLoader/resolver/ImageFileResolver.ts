@@ -5,7 +5,7 @@ import {GraphQLUpload} from 'graphql-upload';
 import path from 'path';
 import mime from 'mime-types';
 import {createWriteStream} from 'fs';
-import {FILE_TYPE_REGEXP, PATH} from '../config';
+import {FILE_TYPE_REGEXP, HOST, PATH} from '../config';
 import {ErrorTitles, throwCustomError} from "../../../common/errors";
 import * as fs from "fs";
 
@@ -35,7 +35,7 @@ export class ImageFileResolver {
             return new Promise((resolve, reject) =>
                 stream
                     .pipe(createWriteStream(`${PATH}/${uniqueName}`))
-                    .on('finish', () => resolve({ filename: uniqueName, mimetype, encoding, imageUrl: `${PATH}/${uniqueName}`}))
+                    .on('finish', () => resolve({ filename: uniqueName, mimetype, encoding, imageUrl: `${HOST}/${uniqueName}`}))
                     .on('error', () => throwCustomError(ErrorTitles.ImageSavingFailed)),
             );
         }

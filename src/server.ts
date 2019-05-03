@@ -10,6 +10,8 @@ import session from "express-session";
 import Redis from 'ioredis';
 import connectRedis from 'connect-redis';
 import {ImageFileResolver} from "./modules/ImageLoader/resolver/ImageFileResolver";
+import path from "path";
+import {HOST, PATH, TARGET_FOLDER} from "./modules/ImageLoader/config";
 
 const redis = new Redis();
 const RedisStore = connectRedis(session);
@@ -41,6 +43,8 @@ async function bootstrap() {
 
         const app = express();
 
+        app.use(express.static(PATH));
+
         app.use(
             cors({
                 credentials: true,
@@ -65,7 +69,7 @@ async function bootstrap() {
         server.applyMiddleware({app, cors: false});
 
         app.listen({ port: 4000 }, () =>
-            console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
+            console.log(`🚀 Server ready at  ${HOST}${server.graphqlPath}`)
         );
 
     } catch (err) {
