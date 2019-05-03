@@ -1,11 +1,10 @@
 import {Arg, Ctx, ID, Mutation, Query, Resolver} from "type-graphql";
 import {RegisterUserInput, User, UserLoginInput} from "../entities/User";
-import {DeleteResult, getRepository, Repository} from "typeorm";
+import {getRepository, Repository} from "typeorm";
 import bcrypt from "bcrypt";
 import {Redis} from "ioredis";
 import {Request} from "express";
-import {ApolloError} from "apollo-server-errors";
-import {customErrors, ErrorTitles} from "../../../common/errors";
+import {ErrorTitles, throwCustomError} from "../../../common/errors";
 import {userSessionIdPrefix} from "../../../common/constants";
 
 interface Context {
@@ -18,11 +17,6 @@ export class UserResolver {
     private readonly repository: Repository<User>;
     constructor() {
         this.repository = getRepository(User);
-    }
-
-    private throwCustomError(error: ErrorTitles) {
-        const {message, code} = customErrors[error];
-        throw new ApolloError(message, code);
     }
 
     private async getUserBySession(ctx: Context): Promise<User|null> {
@@ -47,7 +41,7 @@ export class UserResolver {
         });
 
         if (userAlreadyExists) {
-            this.throwCustomError(ErrorTitles.AlreadyExists);
+            throwCustomError(ErrorTitles.AlreadyExists);
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -72,13 +66,13 @@ export class UserResolver {
         });
 
         if (!user) {
-            this.throwCustomError(ErrorTitles.UserNotFound);
+            throwCustomError(ErrorTitles.UserNotFound);
         }
 
         const valid = await bcrypt.compare(password, user.password);
 
         if (!valid) {
-            this.throwCustomError(ErrorTitles.PasswordInvalid);
+            throwCustomError(ErrorTitles.PasswordInvalid);
         }
 
         ctx.req.session.userId = user.id;
@@ -99,7 +93,7 @@ export class UserResolver {
 
         ctx.req.session.destroy(err => {
             if (err) {
-                this.throwCustomError(ErrorTitles.LogoutFailed)
+                throwCustomError(ErrorTitles.LogoutFailed)
             }
         });
 
