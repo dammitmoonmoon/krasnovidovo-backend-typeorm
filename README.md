@@ -7,4 +7,4 @@ create database krasnovidovo owner admin encoding 'UTF8';
 
 
 # REDIS
-redis-server - запуск сервера
+redis-server - start the server before starting the app
