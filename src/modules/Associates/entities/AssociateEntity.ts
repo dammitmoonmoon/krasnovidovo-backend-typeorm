@@ -28,24 +28,10 @@ export class Associate {
     @Field({ nullable: true })
     @Column({ nullable: true })
     link: string;
-}
-
-@ObjectType({ description: "Deleted AssociateEntity" })
-export class DeletedAssociate {
-    @Field({ nullable: true })
-    fullName: string;
 
     @Field({ nullable: true })
-    position: string;
-
-    @Field({ nullable: true })
-    photo: string;
-
-    @Field({ nullable: true })
-    email: string;
-
-    @Field({ nullable: true })
-    link: string;
+    @Column({ nullable: true })
+    personalPage: string;
 }
 
 @InputType({ description: "Update associate data" })

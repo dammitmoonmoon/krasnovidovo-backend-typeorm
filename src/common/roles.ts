@@ -11,5 +11,5 @@ registerEnumType(Roles, {
 });
 
 export {
-    Roles
+    Roles,
 };

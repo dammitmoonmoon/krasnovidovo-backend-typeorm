@@ -1,10 +1,10 @@
-import {Arg, Ctx, ID, Mutation, Query, Resolver} from "type-graphql";
+import {Arg, Ctx, Mutation, Query, Resolver} from "type-graphql";
 import {RegisterUserInput, User, UserLoginInput} from "../entities/User";
 import {getRepository, Repository} from "typeorm";
 import bcrypt from "bcrypt";
 import {Redis} from "ioredis";
 import {Request} from "express";
-import {ErrorTitles, throwCustomError} from "../../../common/errors";
+import {ErrorCodes, throwCustomError} from "../../../common/errors";
 import {userSessionIdPrefix} from "../../../common/constants";
 
 interface Context {
@@ -19,14 +19,15 @@ export class UserResolver {
         this.repository = getRepository(User);
     }
 
-    private async getUserBySession(ctx: Context): Promise<User|null> {
-        const userId =  ctx.req.session.userId;
+    private async getUserBySession(ctx: Context): Promise<User> {
+        const session = ctx.req.session || throwCustomError(ErrorCodes.session_not_found);
+        const userId = session.userId;
 
         const currentUser = await this.repository.findOne({
             where: {id: userId}
         });
 
-        return currentUser || null;
+        return currentUser || throwCustomError(ErrorCodes.user_not_found);
     }
 
     @Mutation(returns => User, { nullable: false })
@@ -41,7 +42,7 @@ export class UserResolver {
         });
 
         if (userAlreadyExists) {
-            throwCustomError(ErrorTitles.AlreadyExists);
+            throwCustomError(ErrorCodes.user_exists);
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -63,19 +64,13 @@ export class UserResolver {
         const { username, password } = loginInput;
         const user = await this.repository.findOne({
             where: { username },
-        });
+        }) || throwCustomError(ErrorCodes.user_not_found);
 
-        if (!user) {
-            throwCustomError(ErrorTitles.UserNotFound);
-        }
+        await bcrypt.compare(password, user.password) || throwCustomError(ErrorCodes.password_invalid);
 
-        const valid = await bcrypt.compare(password, user.password);
+        const session = ctx.req.session || throwCustomError(ErrorCodes.session_not_found);
 
-        if (!valid) {
-            throwCustomError(ErrorTitles.PasswordInvalid);
-        }
-
-        ctx.req.session.userId = user.id;
+        session.userId = user.id;
 
         if (ctx.req.sessionID) {
             await ctx.redis.lpush(`${userSessionIdPrefix}${user.id}`, ctx.req.sessionID);
@@ -88,12 +83,12 @@ export class UserResolver {
     async logout(
         @Ctx() ctx: Context
     ): Promise<User> {
-
+        const session = ctx.req.session || throwCustomError(ErrorCodes.session_not_found);
         const currentUser = this.getUserBySession(ctx);
 
-        ctx.req.session.destroy(err => {
+        session.destroy(err => {
             if (err) {
-                throwCustomError(ErrorTitles.LogoutFailed)
+                throwCustomError(ErrorCodes.logout_failed)
             }
         });
 

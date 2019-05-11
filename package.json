@@ -4,6 +4,7 @@
    "description": "Awesome project developed with TypeORM.",
    "devDependencies": {
       "@types/bcryptjs": "^2.4.2",
+      "@types/express-session": "^1.15.12",
       "@types/ioredis": "^4.0.10",
       "@types/node": "^11.13.7",
       "@types/uuid": "^3.4.4",

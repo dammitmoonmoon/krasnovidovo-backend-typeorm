@@ -1,6 +1,6 @@
 import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 import {Field, ID, InputType, ObjectType} from "type-graphql";
-import {Roles} from "../../../common/pgEnums";
+import {Roles} from "../../../common/roles";
 
 @ObjectType({ description: "The user model" })
 @Entity("users")

@@ -1,6 +1,6 @@
 import {getRepository, Repository} from "typeorm";
 import {Arg, Int, Mutation, Query, Resolver} from "type-graphql";
-import {AddAssociateInput, Associate, DeletedAssociate, UpdateAssociateInput} from "../entities/AssociateEntity";
+import {AddAssociateInput, Associate, UpdateAssociateInput} from "../entities/AssociateEntity";
 
 @Resolver(of => Associate)
 export class AssociateResolver {
@@ -10,7 +10,7 @@ export class AssociateResolver {
     }
 
     @Query(returns => [Associate], { nullable: true })
-     async associate(
+     async getAssociate(
         @Arg("associateIds", type => [Int])
             associateIds: number[],
     ): Promise<Associate[]> {
@@ -18,7 +18,7 @@ export class AssociateResolver {
     }
 
     @Query(returns => [Associate], { nullable: true })
-    async associates(): Promise<Associate[]> {
+    async getAssociates(): Promise<Associate[]> {
         return this.repository.find();
     }
 
@@ -48,11 +48,11 @@ export class AssociateResolver {
         return await this.repository.save(updatedAssociate);
     }
 
-    @Mutation(returns => [DeletedAssociate], { nullable: false })
+    @Mutation(returns => [Associate], { nullable: false })
     async deleteAssociate(
         @Arg("associateIds", type => [Int])
             associateIds: number[],
-    ): Promise<DeletedAssociate[]> {
+    ): Promise<Associate[]> {
         const selectedAssociates = await this.repository.findByIds(associateIds);
         return await this.repository.remove(selectedAssociates);
     }

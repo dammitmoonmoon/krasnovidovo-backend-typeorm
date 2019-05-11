@@ -10,8 +10,10 @@ import session from "express-session";
 import Redis from 'ioredis';
 import connectRedis from 'connect-redis';
 import {ImageFileResolver} from "./modules/ImageLoader/resolver/ImageFileResolver";
-import path from "path";
-import {HOST, PATH, TARGET_FOLDER} from "./modules/ImageLoader/config";
+import {HOST, PATH} from "./modules/ImageLoader/config";
+import {ErrorCodeResolver} from "./modules/Errors/resolvers/ErrorCodeResolver";
+import {ErrorCode} from "./modules/Errors/entitites/ErrorCode";
+import {ErrorCodes} from "./common/errors";
 
 const redis = new Redis();
 const RedisStore = connectRedis(session);
@@ -29,6 +31,7 @@ async function bootstrap() {
                 RP5MeteoDataResolver,
                 UserResolver,
                 ImageFileResolver,
+                ErrorCodeResolver,
             ],
             validate: false,
         });
